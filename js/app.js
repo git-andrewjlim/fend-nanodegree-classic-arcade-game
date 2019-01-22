@@ -10,18 +10,19 @@ var Enemy = function(speed=1) {
     this.x = -120;
     this.y;
     this.speed;
-    this.width = 101;
+    this.width = 97;
+    this.height = 80;
 
 
     this.changePosition = function(position = 1) {
 
         //change position of bug;
         if(position === 0) {
-            this.y = 60;
+            this.y = 135;
         } else if(position === 1) {
-            this.y = 140;
+            this.y = 220;
         } else if(position === 2) {
-            this.y = 225;
+            this.y = 305;
         }
     }
 
@@ -66,7 +67,8 @@ Enemy.prototype.randomiseProperties = function() {
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    // ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    ctx.drawImage(Resources.get(this.sprite), 3, 76, this.width, this.height, this.x, this.y, this.width, this.height);
 };
 
 // Now write your own player class
@@ -85,18 +87,20 @@ class Player {
         this.canvasBoundryRight = 404;
     }
 
-    update(){
-        // console.log('update');
+    characterHit() {
+        console.log(' CRASH!!!');
+        this.x = 220; // starting X point for character
+        this.y = 454; // starting Y point for character
+    }
+
+    update() {
         //check for collision
-        
-        // console.log('Enemy 1 x:' +  allEnemies[0].x + ', Enemy 1 y:' + allEnemies[0].x);
-        // console.log('my x: ' + this.x + ', my y: ' + this.y);
-        // console.log('Enemy 1 width:' +  allEnemies[0].width);
         for (let i = 0; i< allEnemies.length; i++) {
             
-            if(Math.round(allEnemies[i].x) >= (this.x-this.charWidth/2) && Math.round(allEnemies[i].x) <= (this.x+this.charWidth/2)) {
+            if(Math.round(allEnemies[i].x+allEnemies[i].width/2) >= (this.x-this.charWidth/2) && Math.round(allEnemies[i].x+allEnemies[i].width/2) <= (this.x+this.charWidth/2)) {
                 if(Math.round(allEnemies[i].y) >= (this.y-this.charHeight/2) && Math.round(allEnemies[i].y) <= (this.y+this.charHeight/2)) {
-                    console.log(allEnemies[i].constructor.name + ' CRASH!!!');
+                    this.characterHit();
+                    allEnemies[i].speed = 0;
                 }
             }
         }
