@@ -6,7 +6,7 @@ var Enemy = function(speed=1) {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.speeds = ['slow', 'normal', 'fast'];
-    this.sprite = 'images/enemy-bug.png';
+    this.sprite = 'images/enemy-red-bug.png';
     this.x = -120;
     this.y;
     this.speed;
@@ -29,10 +29,23 @@ var Enemy = function(speed=1) {
     this.changeSpeed = function(speed = 'normal') {
         if(speed === 'slow') {
             this.speed = 15;
+            this.changeColor('blue');
         } else if(speed === 'normal') {
             this.speed = 30;
+            this.changeColor('red');
         } else if(speed === 'fast') {
             this.speed = 45;
+            this.changeColor('yellow');
+        }
+    }
+
+    this.changeColor = function(color) {
+        if(color === 'red') {
+            this.sprite = 'images/enemy-red-bug.png';
+        } else if(color === 'blue') {
+            this.sprite = 'images/enemy-blue-bug.png';
+        } else if(color === 'yellow') {
+            this.sprite = 'images/enemy-yellow-bug.png';
         }
     }
 };
