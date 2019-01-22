@@ -1,11 +1,39 @@
 // Enemies our player must avoid
-var Enemy = function() {
+var Enemy = function(speed=1) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
+
     this.sprite = 'images/enemy-bug.png';
+    this.x = -120;
+    this.y;
+    this.speed;
+    this.width = 101;
+
+
+    this.changePosition = function(position = 1) {
+
+        //change position of bug;
+        if(position === 0) {
+            this.y = 60;
+        } else if(position === 1) {
+            this.y = 140;
+        } else if(position === 2) {
+            this.y = 225;
+        }
+    }
+
+    this.changeSpeed = function(speed = 'normal') {
+        if(speed === 'slow') {
+            this.speed = 15;
+        } else if(speed === 'normal') {
+            this.speed = 30;
+        } else if(speed === 'fast') {
+            this.speed = 45;
+        }
+    }
 };
 
 // Update the enemy's position, required method for game
@@ -14,7 +42,27 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+    // console.log('enemy update');
+    if(this.isOffScreen()) {
+        this.x = -120;  
+        //randomise speed
+        //randomise position
+    }
+    this.x = this.x + 10 * (dt * this.speed);
+    this.render();
 };
+
+Enemy.prototype.isOffScreen = function() {
+    let offscreen = false;
+    if(this.x >= 500) {
+        offscreen = true;
+    }
+    return offscreen;
+};
+
+Enemy.prototype.randomiseProperties = function() {
+    //randomise the position of the objects
+}
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
@@ -27,22 +75,35 @@ Enemy.prototype.render = function() {
 class Player {
     constructor() {
         this.sprite = 'images/char-boy.png';
-        this.x = 18; // starting X point for character
-        this.y = 24; // starting Y point for character
+        this.x = 220; // starting X point for character
+        this.y = 454; // starting Y point for character
         this.charWidth = 66;
         this.charHeight = 86;
-        this.canvasBoundryTop = 104;
+        this.canvasBoundryTop = 101;
         this.canvasBoundryBottom = 18 + (this.charHeight*5);
         this.canvasBoundryLeft = 50;
         this.canvasBoundryRight = 404;
     }
 
     update(){
-        console.log('update');
+        // console.log('update');
+        //check for collision
+        
+        // console.log('Enemy 1 x:' +  allEnemies[0].x + ', Enemy 1 y:' + allEnemies[0].x);
+        // console.log('my x: ' + this.x + ', my y: ' + this.y);
+        // console.log('Enemy 1 width:' +  allEnemies[0].width);
+        for (let i = 0; i< allEnemies.length; i++) {
+            
+            if(Math.round(allEnemies[i].x) >= (this.x-this.charWidth/2) && Math.round(allEnemies[i].x) <= (this.x+this.charWidth/2)) {
+                if(Math.round(allEnemies[i].y) >= (this.y-this.charHeight/2) && Math.round(allEnemies[i].y) <= (this.y+this.charHeight/2)) {
+                    console.log(allEnemies[i].constructor.name + ' CRASH!!!');
+                }
+            }
+        }
+
     }
 
     render(x = this.x, y = this.y) {
-        console.log('render');
         this.x = x;
         this.y = y;
         ctx.drawImage(Resources.get(this.sprite), 18, 64, this.charWidth, this.charHeight, x, y, this.charWidth, this.charHeight);
@@ -52,29 +113,24 @@ class Player {
         console.log('handleInput:' + inputCode);
         
         switch(inputCode) {
+            // debugger;
             case 'down': 
-                // debugger;
-                
                 if (this.y <= this.canvasBoundryBottom) {
-                    //move down
                     this.render(this.x, this.y + this.charHeight);
                 }
                 break;
             case 'up':
                 if (this.y >= this.canvasBoundryTop) {
-                    //move up
                     this.render(this.x, this.y - this.charHeight);
                 }
                 break;
             case 'right':
             if (this.x <= this.canvasBoundryRight) {
-                    //move right
                     this.render(this.x + 101, this.y);
                 }
                 break;
             case 'left':
                 if (this.x >= this.canvasBoundryLeft) {
-                    //move left
                     this.render(this.x - 101, this.y);
                 }
                 break;
@@ -87,10 +143,20 @@ class Player {
 
 
 // Now instantiate your objects.
-let objEnemy = new Enemy();
+let objEnemy1 = new Enemy();
+let objEnemy2 = new Enemy();
+let objEnemy3 = new Enemy();
+objEnemy1.changePosition(0);
+objEnemy1.changeSpeed('slow');
+objEnemy2.changePosition(1);
+objEnemy2.changeSpeed('normal');
+objEnemy3.changePosition(2);
+objEnemy3.changeSpeed('fast');
+
 // Place all enemy objects in an array called allEnemies
-let allEnemies = [];
-allEnemies.push(objEnemy);
+let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
+
+
 // Place the player object in a variable called player
 const player = new Player();
 
