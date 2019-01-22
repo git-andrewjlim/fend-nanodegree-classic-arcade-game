@@ -1,3 +1,28 @@
+class GameProperties {
+    constructor() {
+        this.scoreText = document.querySelector('#score');
+        this.score = 0;
+        this.goalHeight;
+        this.goalWidth;
+        this.goalX = 0;
+        this.goalY = 0;
+    }
+
+    displayScore(){
+        this.scoreText.innerHTML = this.score;
+    }
+
+    addScore(points) {
+        this.score += points;
+    }
+
+    //add section which detects if the character has reached the goal area prevent character from moving.
+
+
+}
+
+
+
 // Enemies our player must avoid
 var Enemy = function(speed=1) {
     // Variables applied to each of our instances go here,
@@ -102,13 +127,20 @@ class Player {
         this.canvasBoundryBottom = 18 + (this.charHeight*5);
         this.canvasBoundryLeft = 50;
         this.canvasBoundryRight = 404;
+        this.scored = false;
     }
 
     characterHit() {
         console.log(' CRASH!!!');
+        this.resetCharacter();
+    }
+
+    resetCharacter() {
         this.x = 220; // starting X point for character
         this.y = 454; // starting Y point for character
     }
+
+
 
     update() {
         //check for collision
@@ -121,6 +153,7 @@ class Player {
                 }
             }
         }
+
 
     }
 
@@ -173,6 +206,7 @@ objEnemy2.changePosition(1);
 objEnemy2.changeSpeed('normal');
 objEnemy3.changePosition(2);
 objEnemy3.changeSpeed('fast');
+const gameProperties = new GameProperties();
 
 // Place all enemy objects in an array called allEnemies
 let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
