@@ -16,9 +16,6 @@ class GameProperties {
         this.score += points;
     }
 
-    //add section which detects if the character has reached the goal area prevent character from moving.
-
-
 }
 
 
@@ -140,7 +137,12 @@ class Player {
         this.y = 454; // starting Y point for character
     }
 
-
+    checkSuccess() {
+        if(this.y < this.canvasBoundryTop) {
+            gameProperties.addScore(1);
+            gameProperties.displayScore();
+        }
+    }
 
     update() {
         //check for collision
@@ -176,6 +178,7 @@ class Player {
             case 'up':
                 if (this.y >= this.canvasBoundryTop) {
                     this.render(this.x, this.y - this.charHeight);
+                    this.checkSuccess();
                 }
                 break;
             case 'right':
