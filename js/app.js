@@ -104,7 +104,7 @@ class Player {
             if(Math.round(allEnemies[i].x+allEnemies[i].width/2) >= (this.x-this.charWidth/2) && Math.round(allEnemies[i].x+allEnemies[i].width/2) <= (this.x+this.charWidth/2)) {
                 if(Math.round(allEnemies[i].y) >= (this.y-this.charHeight/2) && Math.round(allEnemies[i].y) <= (this.y+this.charHeight/2)) {
                     this.characterHit();
-                    allEnemies[i].speed = 0;
+                    // allEnemies[i].speed = 0;
                 }
             }
         }
