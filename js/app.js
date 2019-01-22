@@ -5,7 +5,7 @@ var Enemy = function(speed=1) {
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-
+    this.speeds = ['slow', 'normal', 'fast'];
     this.sprite = 'images/enemy-bug.png';
     this.x = -120;
     this.y;
@@ -46,8 +46,7 @@ Enemy.prototype.update = function(dt) {
     // console.log('enemy update');
     if(this.isOffScreen()) {
         this.x = -120;  
-        //randomise speed
-        //randomise position
+        this.randomiseProperties();
     }
     this.x = this.x + 10 * (dt * this.speed);
     this.render();
@@ -62,12 +61,17 @@ Enemy.prototype.isOffScreen = function() {
 };
 
 Enemy.prototype.randomiseProperties = function() {
-    //randomise the position of the objects
+
+    this.changePosition(this.getRandomInt(3));
+    this.changeSpeed(this.speeds[this.getRandomInt(3)]);
+}
+
+Enemy.prototype.getRandomInt = function(max) {
+    return Math.floor(Math.random() * Math.floor(max));
 }
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-    // ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     ctx.drawImage(Resources.get(this.sprite), 3, 76, this.width, this.height, this.x, this.y, this.width, this.height);
 };
 
