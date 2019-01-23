@@ -176,7 +176,12 @@ var Engine = (function(global) {
         'images/enemy-red-bug.png',
         'images/enemy-blue-bug.png',
         'images/enemy-yellow-bug.png',
-        'images/char-boy.png'
+        'images/enemy-green-bug.png',
+        'images/char-boy.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png'
     ]);
     Resources.onReady(init);
 
@@ -185,4 +190,4 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
-})(this);
+});

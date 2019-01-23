@@ -1,3 +1,24 @@
+const arr_characterChoices = document.querySelectorAll('#choose-character img');
+const startBtn = document.querySelector('#start-game');
+const startPanel = document.querySelector('#choose-character');
+let chosenCharacter = 'boy';
+const global = this;
+let player;
+
+arr_characterChoices.forEach(function(e) {
+    e.addEventListener('click', function(){
+        chosenCharacter = e.getAttribute('alt');
+    })
+});
+
+startBtn.addEventListener('click', function(){
+    player = new Player();
+    Engine(global);
+    startPanel.style.display = 'none';
+});
+
+
+
 class GameProperties {
     constructor() {
         this.scoreText = document.querySelector('#score');
@@ -114,10 +135,11 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 class Player {
     constructor() {
-        this.sprite = 'images/char-boy.png';
+        this.sprite = `images/char-${chosenCharacter}.png`;
         this.x = 220; // starting X point for character
         this.y = 454; // starting Y point for character
         this.offsetY = 20; // accounts for the head overlapping over the next tile (ignore overlap)
+        this.offsetX = 5; // accounts for space of curve of head (ignore overlap)
         this.width = 66;
         this.height = 86;
         this.canvasBoundryTop = 101;
@@ -131,7 +153,7 @@ class Player {
         //return true if width and x && height and y, is the same as this x+ width && height + y
         let hit = false;
             //check sides of target
-            if (target.x+target.width >= this.x && target.x+target.width <= this.x+this.width || target.x >= this.x && target.x <= this.x+this.width) {
+            if (target.x+target.width >= this.x+this.offsetX && target.x+target.width <= this.x+this.width || target.x >= this.x+this.offsetX && target.x <= this.x+this.width) {
                 //check top and bottom of target
                 if(target.y+target.height >= this.y+this.offsetY && target.y+target.height <= this.y+this.height || target.y >= this.y+this.offsetY && target.y <= this.y+this.height) {
                     hit = true;
@@ -145,7 +167,8 @@ class Player {
         // console.log(' CRASH!!!');
         // console.log('PLAYER DATA \n player.x: ' + this.x + '\n player.x+player.width: ' + (this.x+this.width) + '\n player.y: ' + this.y + '\n player.y+player.height: ' + (this.y+this.height) + '\n player.y+player.offsetY: ' + this.y+this.offsetY);
         // console.log('ENEMY DATA \n enemy.x: ' + enemy.x + '\n enemy.x+enemy.width: ' + (enemy.x+enemy.width) + '\n enemy.y: ' + enemy.y + '\n enemy.y+enemy.height: ' + (enemy.y+enemy.height));
-        this.resetCharacter();
+        
+        this.resetCharacter(); // comment this debug collision detection
     }
 
     resetCharacter() {
@@ -179,8 +202,6 @@ class Player {
     }
 
     handleInput(inputCode) {
-        console.log('handleInput:' + inputCode);
-        
         switch(inputCode) {
             // debugger;
             case 'down': 
@@ -229,7 +250,7 @@ let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
 
 
 // Place the player object in a variable called player
-const player = new Player();
+
 
 
 // This listens for key presses and sends the keys to your
