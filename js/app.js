@@ -15,7 +15,6 @@ class GameProperties {
     addScore(points) {
         this.score += points;
     }
-
 }
 
 
@@ -118,17 +117,34 @@ class Player {
         this.sprite = 'images/char-boy.png';
         this.x = 220; // starting X point for character
         this.y = 454; // starting Y point for character
-        this.charWidth = 66;
-        this.charHeight = 86;
+        this.offsetY = 20; // accounts for the head overlapping over the next tile (ignore overlap)
+        this.width = 66;
+        this.height = 86;
         this.canvasBoundryTop = 101;
-        this.canvasBoundryBottom = 18 + (this.charHeight*5);
+        this.canvasBoundryBottom = 18 + (this.height*5);
         this.canvasBoundryLeft = 50;
         this.canvasBoundryRight = 404;
         this.scored = false;
     }
 
-    characterHit() {
-        console.log(' CRASH!!!');
+    checkCollisionWithPlayer(target) {
+        //return true if width and x && height and y, is the same as this x+ width && height + y
+        let hit = false;
+            //check sides of target
+            if (target.x+target.width >= this.x && target.x+target.width <= this.x+this.width || target.x >= this.x && target.x <= this.x+this.width) {
+                //check top and bottom of target
+                if(target.y+target.height >= this.y+this.offsetY && target.y+target.height <= this.y+this.height || target.y >= this.y+this.offsetY && target.y <= this.y+this.height) {
+                    hit = true;
+                }
+            }
+        return hit;
+        
+    } 
+
+    characterHit(enemy) {
+        // console.log(' CRASH!!!');
+        // console.log('PLAYER DATA \n player.x: ' + this.x + '\n player.x+player.width: ' + (this.x+this.width) + '\n player.y: ' + this.y + '\n player.y+player.height: ' + (this.y+this.height) + '\n player.y+player.offsetY: ' + this.y+this.offsetY);
+        // console.log('ENEMY DATA \n enemy.x: ' + enemy.x + '\n enemy.x+enemy.width: ' + (enemy.x+enemy.width) + '\n enemy.y: ' + enemy.y + '\n enemy.y+enemy.height: ' + (enemy.y+enemy.height));
         this.resetCharacter();
     }
 
@@ -146,13 +162,10 @@ class Player {
 
     update() {
         //check for collision
-        for (let i = 0; i< allEnemies.length; i++) {
-            
-            if(Math.round(allEnemies[i].x+allEnemies[i].width/2) >= (this.x-this.charWidth/2) && Math.round(allEnemies[i].x+allEnemies[i].width/2) <= (this.x+this.charWidth/2)) {
-                if(Math.round(allEnemies[i].y) >= (this.y-this.charHeight/2) && Math.round(allEnemies[i].y) <= (this.y+this.charHeight/2)) {
-                    this.characterHit();
-                    // allEnemies[i].speed = 0;
-                }
+        for (let i = 0; i< allEnemies.length; i++) { 
+            if(this.checkCollisionWithPlayer(allEnemies[i])) {
+                this.characterHit(allEnemies[i]);
+                // allEnemies[i].speed = 0; // debug to see collision stop
             }
         }
 
@@ -162,7 +175,7 @@ class Player {
     render(x = this.x, y = this.y) {
         this.x = x;
         this.y = y;
-        ctx.drawImage(Resources.get(this.sprite), 18, 64, this.charWidth, this.charHeight, x, y, this.charWidth, this.charHeight);
+        ctx.drawImage(Resources.get(this.sprite), 18, 64, this.width, this.height, x, y, this.width, this.height);
     }
 
     handleInput(inputCode) {
@@ -172,12 +185,12 @@ class Player {
             // debugger;
             case 'down': 
                 if (this.y <= this.canvasBoundryBottom) {
-                    this.render(this.x, this.y + this.charHeight);
+                    this.render(this.x, this.y + this.height);
                 }
                 break;
             case 'up':
                 if (this.y >= this.canvasBoundryTop) {
-                    this.render(this.x, this.y - this.charHeight);
+                    this.render(this.x, this.y - this.height);
                     this.checkSuccess();
                 }
                 break;
