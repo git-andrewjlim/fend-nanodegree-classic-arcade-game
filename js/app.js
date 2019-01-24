@@ -23,10 +23,10 @@ class GameProperties {
     constructor() {
         this.scoreText = document.querySelector('#score');
         this.score = 0;
-        this.goalHeight;
-        this.goalWidth;
-        this.goalX = 0;
-        this.goalY = 0;
+        this.canvasBoundryTop = 110;
+        this.canvasBoundryBottom = 368; 
+        this.canvasBoundryLeft = 19;
+        this.canvasBoundryRight = 421;
     }
 
     displayScore(){
@@ -135,6 +135,15 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 class Player {
     constructor() {
+        this.character = {
+            boy: {
+                height: 86,
+                offsetY: 20, // accounts for the head overlapping over the next tile (ignore overlap)
+                offsetX:5, // accounts for space of curve of head (ignore overlap)
+                width:66
+            }
+
+        }
         this.sprite = `images/char-${chosenCharacter}.png`;
         this.x = 220; // starting X point for character
         this.y = 454; // starting Y point for character
@@ -142,10 +151,6 @@ class Player {
         this.offsetX = 5; // accounts for space of curve of head (ignore overlap)
         this.width = 66;
         this.height = 86;
-        this.canvasBoundryTop = 101;
-        this.canvasBoundryBottom = 18 + (this.height*5);
-        this.canvasBoundryLeft = 50;
-        this.canvasBoundryRight = 404;
         this.scored = false;
     }
 
@@ -177,7 +182,7 @@ class Player {
     }
 
     checkSuccess() {
-        if(this.y < this.canvasBoundryTop) {
+        if(this.y < gameProperties.canvasBoundryTop) {
             gameProperties.addScore(1);
             gameProperties.displayScore();
         }
@@ -205,23 +210,24 @@ class Player {
         switch(inputCode) {
             // debugger;
             case 'down': 
-                if (this.y <= this.canvasBoundryBottom) {
+                if (this.y <= gameProperties.canvasBoundryBottom) {
                     this.render(this.x, this.y + this.height);
                 }
                 break;
             case 'up':
-                if (this.y >= this.canvasBoundryTop) {
+                if (this.y >= gameProperties.canvasBoundryTop) {
+                    // you can check using a map (yet to build) whether the item above is a blocked asset (if it is a rock dont move on it)
                     this.render(this.x, this.y - this.height);
                     this.checkSuccess();
                 }
                 break;
             case 'right':
-            if (this.x <= this.canvasBoundryRight) {
+            if (this.x <= gameProperties.canvasBoundryRight) {
                     this.render(this.x + 101, this.y);
                 }
                 break;
             case 'left':
-                if (this.x >= this.canvasBoundryLeft) {
+                if (this.x >= gameProperties.canvasBoundryLeft) {
                     this.render(this.x - 101, this.y);
                 }
                 break;
