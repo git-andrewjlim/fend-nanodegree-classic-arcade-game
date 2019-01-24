@@ -8,6 +8,8 @@ let player;
 arr_characterChoices.forEach(function(e) {
     e.addEventListener('click', function(){
         chosenCharacter = e.getAttribute('alt');
+        resetCharacterGlow();
+        e.setAttribute('src', `images/char-${chosenCharacter}-glow.png`);
     })
 });
 
@@ -16,6 +18,19 @@ startBtn.addEventListener('click', function(){
     Engine(global);
     startPanel.style.display = 'none';
 });
+
+function resetCharacterGlow() {
+    arr_characterChoices.forEach(function(e){
+        
+        glowImageName = e.getAttribute('src');
+        
+        if(glowImageName.indexOf('-glow') != -1){
+            let regularName = glowImageName.slice(0, glowImageName.indexOf('-glow'));
+            regularName += '.png';
+            e.setAttribute('src', regularName);
+        }
+    })
+}
 
 
 
@@ -27,6 +42,24 @@ class GameProperties {
         this.canvasBoundryBottom = 368; 
         this.canvasBoundryLeft = 19;
         this.canvasBoundryRight = 421;
+        this.assetMap = [
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0]
+        ];
+        this.characterStartingRow = 6;
+        this.characterStartingCol = 3;
+        this.startingCoordinates = this.calculateCoordinates(this.characterStartingRow,this.characterStartingCol);
+    }
+
+    calculateCoordinates(mapRow, mapCol) {
+        return {
+            x: (mapCol-1)*100.5 +20,
+            y: (mapRow-1)*86 + 24
+        }
     }
 
     displayScore(){
@@ -118,6 +151,7 @@ Enemy.prototype.isOffScreen = function() {
 Enemy.prototype.randomiseProperties = function() {
 
     this.changePosition(this.getRandomInt(3));
+    // this.changePosition(1); // debug
     this.changeSpeed(this.speeds[this.getRandomInt(3)]);
 }
 
@@ -135,22 +169,28 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 class Player {
     constructor() {
-        this.character = {
-            boy: {
-                height: 86,
-                offsetY: 20, // accounts for the head overlapping over the next tile (ignore overlap)
-                offsetX:5, // accounts for space of curve of head (ignore overlap)
-                width:66
-            }
+        this.characterDetails = {
+            /* 
+                height: the height of the character after subset is removed (used for collision detection)
+                width: the height of the character after subset is removed (used for collision detection)
+                offsetTop: accounts for the head overlapping over the next tile (ignore overlap)
+                offsetSides: accounts for space of curve of head (ignore overlap)
+                imageSubsetX: the x coordinates of the subset of the usable image of the character (ignores the transparency)
+                imageSubsetY: the y coordinates of the subset of the usable image of the character (ignores the transparency)
 
+            */
+            'boy': {height: 86, width:66, offsetSides:5, offsetTop: 26, imageSubsetX: 18, imageSubsetY: 63},
+            'cat-girl': {height: 89,width:66, offsetSides:5, offsetTop: 29, imageSubsetX: 18, imageSubsetY: 61},
+            'horn-girl': {height: 89, width:66, offsetSides:5, offsetTop: 29, imageSubsetX: 18, imageSubsetY: 61},
+            'pink-girl': {height: 86, width:66, offsetSides:5, offsetTop: 20, imageSubsetX: 18, imageSubsetY: 63},
+            'princess-girl': {height: 96, width:66, offsetSides:5, offsetTop: 20, imageSubsetX: 18, imageSubsetY: 52}
         }
+        this.character = chosenCharacter;
         this.sprite = `images/char-${chosenCharacter}.png`;
-        this.x = 220; // starting X point for character
-        this.y = 454; // starting Y point for character
-        this.offsetY = 20; // accounts for the head overlapping over the next tile (ignore overlap)
-        this.offsetX = 5; // accounts for space of curve of head (ignore overlap)
-        this.width = 66;
-        this.height = 86;
+        this.x = gameProperties.startingCoordinates.x; // starting X point for character
+        this.y = gameProperties.startingCoordinates.y; // starting Y point for character
+        this.currentMapX; // maps the x position to the asset map
+        this.currentMapY; // maps the y position to the asset map
         this.scored = false;
     }
 
@@ -158,9 +198,9 @@ class Player {
         //return true if width and x && height and y, is the same as this x+ width && height + y
         let hit = false;
             //check sides of target
-            if (target.x+target.width >= this.x+this.offsetX && target.x+target.width <= this.x+this.width || target.x >= this.x+this.offsetX && target.x <= this.x+this.width) {
-                //check top and bottom of target
-                if(target.y+target.height >= this.y+this.offsetY && target.y+target.height <= this.y+this.height || target.y >= this.y+this.offsetY && target.y <= this.y+this.height) {
+            if (target.x+target.width >= this.x+this.characterDetails[this.character].offsetSides && target.x+target.width <= this.x+this.characterDetails[this.character].width || target.x >= this.x+this.characterDetails[this.character].offsetSides && target.x <= this.x+this.characterDetails[this.character].width) {
+                // do not need full height of target to check for collision
+                if(target.y+(target.height/2) >= this.y+this.characterDetails[this.character].offsetTop && target.y+(target.height/2) <= this.y+this.characterDetails[this.character].height) {
                     hit = true;
                 }
             }
@@ -169,16 +209,14 @@ class Player {
     } 
 
     characterHit(enemy) {
-        // console.log(' CRASH!!!');
-        // console.log('PLAYER DATA \n player.x: ' + this.x + '\n player.x+player.width: ' + (this.x+this.width) + '\n player.y: ' + this.y + '\n player.y+player.height: ' + (this.y+this.height) + '\n player.y+player.offsetY: ' + this.y+this.offsetY);
-        // console.log('ENEMY DATA \n enemy.x: ' + enemy.x + '\n enemy.x+enemy.width: ' + (enemy.x+enemy.width) + '\n enemy.y: ' + enemy.y + '\n enemy.y+enemy.height: ' + (enemy.y+enemy.height));
-        
         this.resetCharacter(); // comment this debug collision detection
     }
 
     resetCharacter() {
-        this.x = 220; // starting X point for character
-        this.y = 454; // starting Y point for character
+        // this.x = 220; // starting X point for character
+        // this.y = 454; // starting Y point for character
+        this.x = gameProperties.startingCoordinates.x;
+        this.y = gameProperties.startingCoordinates.y;
     }
 
     checkSuccess() {
@@ -203,7 +241,7 @@ class Player {
     render(x = this.x, y = this.y) {
         this.x = x;
         this.y = y;
-        ctx.drawImage(Resources.get(this.sprite), 18, 64, this.width, this.height, x, y, this.width, this.height);
+        ctx.drawImage(Resources.get(this.sprite), this.characterDetails[this.character].imageSubsetX, this.characterDetails[this.character].imageSubsetY, this.characterDetails[this.character].width, this.characterDetails[this.character].height, x, y, this.characterDetails[this.character].width, this.characterDetails[this.character].height);
     }
 
     handleInput(inputCode) {
@@ -211,13 +249,13 @@ class Player {
             // debugger;
             case 'down': 
                 if (this.y <= gameProperties.canvasBoundryBottom) {
-                    this.render(this.x, this.y + this.height);
+                    this.render(this.x, this.y + this.characterDetails[this.character].height);
                 }
                 break;
             case 'up':
                 if (this.y >= gameProperties.canvasBoundryTop) {
                     // you can check using a map (yet to build) whether the item above is a blocked asset (if it is a rock dont move on it)
-                    this.render(this.x, this.y - this.height);
+                    this.render(this.x, this.y - this.characterDetails[this.character].height);
                     this.checkSuccess();
                 }
                 break;
@@ -254,8 +292,6 @@ const gameProperties = new GameProperties();
 // Place all enemy objects in an array called allEnemies
 let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
 
-
-// Place the player object in a variable called player
 
 
 
