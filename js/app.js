@@ -43,7 +43,7 @@ class GameProperties {
         this.canvasBoundryLeft = 19;
         this.canvasBoundryRight = 421;
         this.assetMap = [
-            [0,0,0,0,0],
+            [2,2,2,2,2],
             [0,0,0,0,0],
             [0,0,0,0,0],
             [0,0,0,0,0],
@@ -56,6 +56,18 @@ class GameProperties {
         this.startingCoordinatesX =  this.covertColToX(this.characterStartingCol);
         this.startingCoordinatesY =  this.convertRowToY(this.characterStartingRow,);
         // this.startingCoordinates = this.calculateCoordinates(this.characterStartingRow,this.characterStartingCol);
+        // asset Items include a name, the image reference and whether they block the character
+        this.assetItems = {
+            0: ['clear', '' ,false],
+            1: ['rock', 'images/Rock.png', true],
+            2: ['goal', 'images/Selector.png', false],
+            3: ['green gem','images/Gem Green.png', false],
+            4: ['blue gem','images/Gem Blue.png', false],
+            5: ['orange gem','images/Gem Orange.png', false],
+            6: ['star','images/Star.png', false],
+            7: ['key','images/Key.png', false],
+            8: ['heart','images/Heart.png', false]
+        }
     }
 
     // calculateCoordinates(mapRow, mapCol) {
@@ -64,6 +76,25 @@ class GameProperties {
     //         y: mapRow*86 + 24
     //     }
     // }
+
+    loadAssetsToBoard() {
+        for(let i = 0; i<this.assetMap.length; i++){
+            for(let j = 0; j<this.assetMap[i].length; j++){
+                // console.log('i: ' + i + ' j: ' + j);
+                // console.log(this.assetMap[i][j]);
+                // console.log(this.assetItems[this.assetMap[i][j]][1]);
+                if(this.assetItems[this.assetMap[i][j]][1]) {
+                    console.log(this.assetItems[this.assetMap[i][j]][1]);
+                }
+            }
+        }
+    }
+
+    showGameComplete() {
+        const endPanel = document.querySelector('#end-screen');
+        console.log(endPanel);
+        endPanel.style.display = 'block';
+    }
 
     convertRowToY(mapRow) {
         return mapRow*86 + 24;
@@ -248,7 +279,7 @@ class Player {
         for (let i = 0; i< allEnemies.length; i++) { 
             if(this.checkCollisionWithPlayer(allEnemies[i])) {
                 this.characterHit(allEnemies[i]);
-                allEnemies[i].speed = 0; // debug to see collision stop
+                // allEnemies[i].speed = 0; // debug to see collision stop
             }
         }
     }
@@ -272,8 +303,14 @@ class Player {
                     console.log('moving on up');
                     //assuming 1 is a rock (if more than a rock then put in an array)
                     if(gameProperties.assetMap[this.currentMapRow-1][this.currentMapCol]!=1) {
-                        this.currentMapRow = this.currentMapRow-1;
-                        this.y = gameProperties.convertRowToY(this.currentMapRow);
+                        if(gameProperties.assetMap[this.currentMapRow-1][this.currentMapCol]==2) {
+                            gameProperties.showGameComplete();
+                        } else {
+                            this.currentMapRow = this.currentMapRow-1;
+                            this.y = gameProperties.convertRowToY(this.currentMapRow);
+                        }
+
+                        
                     } else {
                         console.log('youre blocked');
                     }
@@ -368,16 +405,13 @@ objEnemy2.changeSpeed('normal');
 objEnemy3.changePosition(2);
 objEnemy3.changeSpeed('fast');
 const gameProperties = new GameProperties();
+gameProperties.loadAssetsToBoard();
 
 // Place all enemy objects in an array called allEnemies
 let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
 
 
-
-
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
+function handleKeys(e) {
     var allowedKeys = {
         37: 'left',
         38: 'up',
@@ -386,4 +420,19 @@ document.addEventListener('keyup', function(e) {
     };
 
     player.handleInput(allowedKeys[e.keyCode]);
-});
+}
+
+
+// This listens for key presses and sends the keys to your
+// Player.handleInput() method. You don't need to modify this.
+// document.addEventListener('keyup', function(e) {
+//     var allowedKeys = {
+//         37: 'left',
+//         38: 'up',
+//         39: 'right',
+//         40: 'down'
+//     };
+
+//     player.handleInput(allowedKeys[e.keyCode]);
+// });
+document.addEventListener('keyup', handleKeys);
