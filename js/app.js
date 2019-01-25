@@ -1,10 +1,35 @@
+// AUTHOR: ANDREW LIM
+// GITHUB: https://git-andrewjlim.github.io/fend-nanodegree-classic-arcade-game
+
+
+// ===============
+// GLOBAL VARIABLES
+// ===============
+const global = this;
 const arr_characterChoices = document.querySelectorAll('#choose-character img');
 const startBtn = document.querySelector('#start-game');
 const startPanel = document.querySelector('#choose-character');
 let chosenCharacter = 'boy';
-const global = this;
 let player;
 
+
+// ===============
+// EVENT HANDLERS
+// ===============
+
+
+document.addEventListener('keyup', handleKeys);
+
+
+// Start the game by invoking the engine (engine.js)
+startBtn.addEventListener('click', function(){
+    player = new Player();
+    Engine(global);
+    startPanel.style.display = 'none';
+});
+
+
+// Highlight the chosen character on the start panel
 arr_characterChoices.forEach(function(e) {
     e.addEventListener('click', function(){
         chosenCharacter = e.getAttribute('alt');
@@ -13,35 +38,43 @@ arr_characterChoices.forEach(function(e) {
     })
 });
 
-startBtn.addEventListener('click', function(){
-    player = new Player();
-    Engine(global);
-    startPanel.style.display = 'none';
-});
 
+// Handle key functions, extracted so this can also be disabled using removeEventListner
+function handleKeys(e) {
+    var allowedKeys = {
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down'
+    };
+    player.handleInput(allowedKeys[e.keyCode]);
+}
+
+
+// Remove the character glows from the other characters on the start panel
 function resetCharacterGlow() {
     arr_characterChoices.forEach(function(e){
-        
         glowImageName = e.getAttribute('src');
-        
         if(glowImageName.indexOf('-glow') != -1){
-            let regularName = glowImageName.slice(0, glowImageName.indexOf('-glow'));
-            regularName += '.png';
-            e.setAttribute('src', regularName);
+            let regularImageName = glowImageName.slice(0, glowImageName.indexOf('-glow'));
+            regularImageName += '.png';
+            e.setAttribute('src', regularImageName);
         }
     })
 }
 
 
-
+// Additional game properties 
+// TODO: Add this to the engine.js
 class GameProperties {
     constructor() {
         this.scoreText = document.querySelector('#score');
-        this.score = 0;
-        this.canvasBoundryTop = 110;
-        this.canvasBoundryBottom = 368; 
-        this.canvasBoundryLeft = 19;
-        this.canvasBoundryRight = 421;
+        this.characterStartingRow = 5; // Starting x point for character
+        this.characterStartingCol = 2; // Starting y point for character
+        this.startingCoordinatesX =  this.covertColToX(this.characterStartingCol);
+        this.startingCoordinatesY =  this.convertRowToY(this.characterStartingRow,);
+
+        // Define boundaries of board and also elements of map
         this.assetMap = [
             [2,2,2,2,2],
             [0,0,0,0,0],
@@ -50,13 +83,9 @@ class GameProperties {
             [0,0,0,0,0],
             [0,0,0,0,0]
         ];
-        this.characterStartingRow = 5; //starting at 0
-        this.characterStartingCol = 2; //starting at 0
 
-        this.startingCoordinatesX =  this.covertColToX(this.characterStartingCol);
-        this.startingCoordinatesY =  this.convertRowToY(this.characterStartingRow,);
-        // this.startingCoordinates = this.calculateCoordinates(this.characterStartingRow,this.characterStartingCol);
         // asset Items include a name, the image reference and whether they block the character
+        // TODO: add height, width and subdivision of images so that it can easily be placed on the board
         this.assetItems = {
             0: ['clear', '' ,false],
             1: ['rock', 'images/Rock.png', true],
@@ -70,46 +99,36 @@ class GameProperties {
         }
     }
 
-    // calculateCoordinates(mapRow, mapCol) {
-    //     return {
-    //         x: mapCol*100.5 +20,
-    //         y: mapRow*86 + 24
-    //     }
-    // }
 
+    // Add assets to board depending upon assetMap array and assetItems object
+    // TODO: Update so assets are added to board automatically, will need to add height, width and offsets for this to work correctly
     loadAssetsToBoard() {
         for(let i = 0; i<this.assetMap.length; i++){
             for(let j = 0; j<this.assetMap[i].length; j++){
-                // console.log('i: ' + i + ' j: ' + j);
-                // console.log(this.assetMap[i][j]);
-                // console.log(this.assetItems[this.assetMap[i][j]][1]);
                 if(this.assetItems[this.assetMap[i][j]][1]) {
-                    console.log(this.assetItems[this.assetMap[i][j]][1]);
+                    // console.log(this.assetItems[this.assetMap[i][j]][1]);
                 }
             }
         }
     }
 
+    // Show a panel for completion of game
     showGameComplete() {
         const endPanel = document.querySelector('#end-screen');
-        console.log(endPanel);
         endPanel.style.display = 'block';
+        document.removeEventListener('keyup', handleKeys);
     }
 
+    // Convert assetMap row locations to Y coordinates
+    // TODO: Update so it is standardised for characters of different heights
     convertRowToY(mapRow) {
         return mapRow*86 + 24;
     }
 
+    // Convert assetMap column locations to X coordinates
+    // TODO: Update so it can read the size of the image tiles within engine.js
     covertColToX(mapCol) {
         return mapCol*100.5 +20;
-    }
-
-    displayScore(){
-        this.scoreText.innerHTML = this.score;
-    }
-
-    addScore(points) {
-        this.score += points;
     }
 }
 
@@ -117,22 +136,17 @@ class GameProperties {
 
 // Enemies our player must avoid
 var Enemy = function(speed=1) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
     this.speeds = ['slow', 'normal', 'fast'];
     this.sprite = 'images/enemy-red-bug.png';
-    this.x = -120;
+    this.x = -120; // starting off screen position for bugs
     this.y;
     this.speed;
     this.width = 97;
     this.height = 80;
 
 
+    // dynamically change which road to run on
     this.changePosition = function(position = 1) {
-
         //change position of bug;
         if(position === 0) {
             this.y = 135;
@@ -143,6 +157,7 @@ var Enemy = function(speed=1) {
         }
     }
 
+    // dynamically change the speed of the bug and change the color to reflect the speed
     this.changeSpeed = function(speed = 'normal') {
         if(speed === 'slow') {
             this.speed = 15;
@@ -156,6 +171,8 @@ var Enemy = function(speed=1) {
         }
     }
 
+
+    // change the color of the bugs, this is dependent upon speed
     this.changeColor = function(color) {
         if(color === 'red') {
             this.sprite = 'images/enemy-red-bug.png';
@@ -167,13 +184,9 @@ var Enemy = function(speed=1) {
     }
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+
+// Enemy update is continuously run
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-    // console.log('enemy update');
     if(this.isOffScreen()) {
         this.x = -120;  
         this.randomiseProperties();
@@ -182,6 +195,8 @@ Enemy.prototype.update = function(dt) {
     this.render();
 };
 
+
+// Check to see if bug is on screen and if not return to offscreen location
 Enemy.prototype.isOffScreen = function() {
     let offscreen = false;
     if(this.x >= 500) {
@@ -190,27 +205,37 @@ Enemy.prototype.isOffScreen = function() {
     return offscreen;
 };
 
-Enemy.prototype.randomiseProperties = function() {
 
+// Randomise the enemy position on the road and vary their speed
+Enemy.prototype.randomiseProperties = function() {
     this.changePosition(this.getRandomInt(3));
-    // this.changePosition(1); // debug
     this.changeSpeed(this.speeds[this.getRandomInt(3)]);
 }
 
+
+// provide a random number based under a passed limit argument
 Enemy.prototype.getRandomInt = function(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
-// Draw the enemy on the screen, required method for game
+
+// Draw the enemy on the screen, required method for game, supply with subdimensions to eliminate transparency of image
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), 3, 76, this.width, this.height, this.x, this.y, this.width, this.height);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+
+// Character that the user controls
 class Player {
     constructor() {
+        this.character = chosenCharacter; // character type chosen from start panel
+        this.sprite = `images/char-${chosenCharacter}.png`;
+        this.currentMapCol = gameProperties.characterStartingCol; // maps the x position to the asset map
+        this.currentMapRow =  gameProperties.characterStartingRow; // maps the y position to the asset map
+        this.x = gameProperties.covertColToX(this.currentMapCol); // current x position for character - required for collision detection
+        this.y = gameProperties.convertRowToY(this.currentMapRow); // current y position for character - required for collision detection
+
+        //character details are required because characters are of different heights and may overlap onto tiles
         this.characterDetails = {
             /* 
                 height: the height of the character after subset is removed (used for collision detection)
@@ -227,164 +252,98 @@ class Player {
             'pink-girl': {height: 86, width:66, offsetSides:5, offsetTop: 20, imageSubsetX: 18, imageSubsetY: 63},
             'princess-girl': {height: 96, width:66, offsetSides:5, offsetTop: 20, imageSubsetX: 18, imageSubsetY: 52}
         }
-        this.character = chosenCharacter;
-        this.sprite = `images/char-${chosenCharacter}.png`;
-        // this.x = gameProperties.startingCoordinates.x; // starting X point for character
-        // this.y = gameProperties.startingCoordinates.y; // starting Y point for character
-
-        this.currentMapCol = gameProperties.characterStartingCol; // maps the x position to the asset map
-        this.currentMapRow =  gameProperties.characterStartingRow; // maps the y position to the asset map
-        this.x = gameProperties.covertColToX(this.currentMapCol);
-        this.y = gameProperties.convertRowToY(this.currentMapRow);
-        this.scored = false;
     }
 
+
+    // check to see if target collides with user character
     checkCollisionWithPlayer(target) {
-        //return true if width and x && height and y, is the same as this x+ width && height + y
         let hit = false;
             //check sides of target
             if (target.x+target.width >= this.x+this.characterDetails[this.character].offsetSides && target.x+target.width <= this.x+this.characterDetails[this.character].width || target.x >= this.x+this.characterDetails[this.character].offsetSides && target.x <= this.x+this.characterDetails[this.character].width) {
-                // do not need full height of target to check for collision
+                // do not need full height of target to check for collision - use middle instead
                 if(target.y+(target.height/2) >= this.y+this.characterDetails[this.character].offsetTop && target.y+(target.height/2) <= this.y+this.characterDetails[this.character].height) {
-                    console.log('y hit');
                     hit = true;
                 }
             }
         return hit;
-        
     } 
 
+
+    // actions to take if character is hit by enemy
     characterHit(enemy) {
-        this.resetCharacter(); // comment this debug collision detection
+        this.resetCharacter();
     }
 
+    // return character to initial position after collision
     resetCharacter() {
-        // this.x = 220; // starting X point for character
-        // this.y = 454; // starting Y point for character
         this.x = gameProperties.startingCoordinatesX;
         this.y = gameProperties.startingCoordinatesY;
         this.currentMapRow = gameProperties.characterStartingRow;
         this.currentMapCol = gameProperties.characterStartingCol;
     }
 
-    checkSuccess() {
-        if(this.y < gameProperties.canvasBoundryTop) {
-            gameProperties.addScore(1);
-            gameProperties.displayScore();
-        }
-    }
-
+    // continuous updates associated with character (controlled by engine.js)
     update() {
         //check for collision
         for (let i = 0; i< allEnemies.length; i++) { 
             if(this.checkCollisionWithPlayer(allEnemies[i])) {
                 this.characterHit(allEnemies[i]);
-                // allEnemies[i].speed = 0; // debug to see collision stop
             }
         }
     }
 
-    movePlayerThroughMap(direction) {
-        switch(direction) {
-            case 'down': 
-            if(this.currentMapRow < gameProperties.assetMap.length-1) {
-                console.log('sliding down');
-                //assuming 1 is a rock (if more than a rock then put in an array)
-                if(gameProperties.assetMap[this.currentMapRow+1][this.currentMapCol]!=1) {
-                    this.currentMapRow = this.currentMapRow+1;
-                    this.y = gameProperties.convertRowToY(this.currentMapRow);
-                } else {
-                    console.log('youre blocked');
+
+    // render character on board, use location from assetMap
+    render() {
+        this.x = gameProperties.covertColToX(this.currentMapCol);
+        ctx.drawImage(Resources.get(this.sprite), this.characterDetails[this.character].imageSubsetX, this.characterDetails[this.character].imageSubsetY, this.characterDetails[this.character].width, this.characterDetails[this.character].height, this.x, this.y, this.characterDetails[this.character].width, this.characterDetails[this.character].height);
+    }
+
+    // take user input for direction, check the map for blocker elements or assets if nothing blocking then move in the required direction
+    // A 1 represents a blocker asset (e.g. Rock) - TODO: Add assets to page
+    handleInput(inputCode) {
+        switch(inputCode) {
+            case 'down':
+                if(this.currentMapRow < gameProperties.assetMap.length-1) {
+                    if(gameProperties.assetMap[this.currentMapRow+1][this.currentMapCol]!=1) {
+                        this.currentMapRow = this.currentMapRow+1;
+                        this.y = gameProperties.convertRowToY(this.currentMapRow);
+                    }
                 }
-            }
+            this.render(); 
                 break;
             case 'up':
                 if(this.currentMapRow >0) {
-                    console.log('moving on up');
-                    //assuming 1 is a rock (if more than a rock then put in an array)
                     if(gameProperties.assetMap[this.currentMapRow-1][this.currentMapCol]!=1) {
+                        // check to see if it this move will complete the game (2 is the goal area)
+                        // TODO: change this so that there is a single tile for completion of game, and apply to other directions
                         if(gameProperties.assetMap[this.currentMapRow-1][this.currentMapCol]==2) {
                             gameProperties.showGameComplete();
                         } else {
                             this.currentMapRow = this.currentMapRow-1;
                             this.y = gameProperties.convertRowToY(this.currentMapRow);
                         }
-
-                        
-                    } else {
-                        console.log('youre blocked');
                     }
                 }
-                
+                this.render();
                 break;
             case 'right':
-            
-            if(this.currentMapCol < gameProperties.assetMap[0].length-1) {
-                console.log('I am right');
-                //assuming 1 is a rock (if more than a rock then put in an array)
-                if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol+1]!=1) {
-                    this.currentMapCol = this.currentMapCol+1;
-                    this.x = gameProperties.covertColToX(this.currentMapCol);
-                } else {
-                    console.log('youre blocked');
+                if(this.currentMapCol < gameProperties.assetMap[0].length-1) {
+                    if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol+1]!=1) {
+                        this.currentMapCol = this.currentMapCol+1;
+                        this.x = gameProperties.covertColToX(this.currentMapCol);
+                    }
                 }
-            }
-            break;
-            
+                this.render();
                 break;
             case 'left':
                 if(this.currentMapCol >0) {
-                    console.log('moving left');
-                    //assuming 1 is a rock (if more than a rock then put in an array)
                     if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol-1]!=1) {
                         this.currentMapCol = this.currentMapCol-1;
                         this.x = gameProperties.covertColToX(this.currentMapCol);
-                    } else {
-                        console.log('youre blocked');
                     }
                 }
-                break;
-        }
-    }
-
-    render() {
-        this.x = gameProperties.covertColToX(this.currentMapCol);
-        // this.y = gameProperties.convertRowToY(this.currentMapRow);
-        ctx.drawImage(Resources.get(this.sprite), this.characterDetails[this.character].imageSubsetX, this.characterDetails[this.character].imageSubsetY, this.characterDetails[this.character].width, this.characterDetails[this.character].height, this.x, this.y, this.characterDetails[this.character].width, this.characterDetails[this.character].height);
-    }
-
-    handleInput(inputCode) {
-        switch(inputCode) {
-            // debugger;
-            case 'down':
-            this.movePlayerThroughMap('down');
-            this.render(); 
-                // if (this.y <= gameProperties.canvasBoundryBottom) {
-                //     this.render(this.x, this.y + this.characterDetails[this.character].height);
-                // }
-                break;
-            case 'up':
-                this.movePlayerThroughMap('up');
                 this.render();
-                // if (this.y >= gameProperties.canvasBoundryTop) {
-                //     // you can check using a map (yet to build) whether the item above is a blocked asset (if it is a rock dont move on it)
-                //     this.render(this.x, this.y - this.characterDetails[this.character].height);
-                //     this.checkSuccess();
-                // }
-                break;
-            case 'right':
-                this.movePlayerThroughMap('right');
-                this.render();
-            // if (this.x <= gameProperties.canvasBoundryRight) {
-            //         this.render(this.x + 101, this.y);
-            //     }
-                break;
-            case 'left':
-                this.movePlayerThroughMap('left');
-                this.render();
-                // if (this.x >= gameProperties.canvasBoundryLeft) {
-                //     this.render(this.x - 101, this.y);
-                // }
                 break;
             default:
                 console.log('key not recognised');
@@ -395,6 +354,7 @@ class Player {
 
 
 // Now instantiate your objects.
+const gameProperties = new GameProperties();
 let objEnemy1 = new Enemy();
 let objEnemy2 = new Enemy();
 let objEnemy3 = new Enemy();
@@ -404,35 +364,13 @@ objEnemy2.changePosition(1);
 objEnemy2.changeSpeed('normal');
 objEnemy3.changePosition(2);
 objEnemy3.changeSpeed('fast');
-const gameProperties = new GameProperties();
-gameProperties.loadAssetsToBoard();
 
 // Place all enemy objects in an array called allEnemies
 let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
 
 
-function handleKeys(e) {
-    var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
-    };
-
-    player.handleInput(allowedKeys[e.keyCode]);
-}
 
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
-// document.addEventListener('keyup', function(e) {
-//     var allowedKeys = {
-//         37: 'left',
-//         38: 'up',
-//         39: 'right',
-//         40: 'down'
-//     };
 
-//     player.handleInput(allowedKeys[e.keyCode]);
-// });
-document.addEventListener('keyup', handleKeys);
+
+

@@ -30,23 +30,6 @@ var Engine = (function(global) {
     canvasHolder.appendChild(canvas);
 
 
-    //debug coords
-    // canvas.addEventListener("click", function (evt) {
-    //     var mousePos = getMousePos(canvas, evt);
-    //     alert('X: ' + mousePos.x + ', Y: ' + mousePos.y);
-    // }, false);
-    
-    // //Get Mouse Position
-    // function getMousePos(canvas, evt) {
-    //     var rect = canvas.getBoundingClientRect();
-    //     return {
-    //         x: evt.clientX - rect.left,
-    //         y: evt.clientY - rect.top
-    //     };
-    // }
-
-
-
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
