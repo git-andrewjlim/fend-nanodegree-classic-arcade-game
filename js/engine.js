@@ -31,19 +31,19 @@ var Engine = (function(global) {
 
 
     //debug coords
-    canvas.addEventListener("click", function (evt) {
-        var mousePos = getMousePos(canvas, evt);
-        alert('X: ' + mousePos.x + ', Y: ' + mousePos.y);
-    }, false);
+    // canvas.addEventListener("click", function (evt) {
+    //     var mousePos = getMousePos(canvas, evt);
+    //     alert('X: ' + mousePos.x + ', Y: ' + mousePos.y);
+    // }, false);
     
-    //Get Mouse Position
-    function getMousePos(canvas, evt) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
-        };
-    }
+    // //Get Mouse Position
+    // function getMousePos(canvas, evt) {
+    //     var rect = canvas.getBoundingClientRect();
+    //     return {
+    //         x: evt.clientX - rect.left,
+    //         y: evt.clientY - rect.top
+    //     };
+    // }
 
 
 

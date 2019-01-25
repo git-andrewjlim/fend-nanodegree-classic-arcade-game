@@ -50,16 +50,27 @@ class GameProperties {
             [0,0,0,0,0],
             [0,0,0,0,0]
         ];
-        this.characterStartingRow = 6;
-        this.characterStartingCol = 3;
-        this.startingCoordinates = this.calculateCoordinates(this.characterStartingRow,this.characterStartingCol);
+        this.characterStartingRow = 5; //starting at 0
+        this.characterStartingCol = 2; //starting at 0
+
+        this.startingCoordinatesX =  this.covertColToX(this.characterStartingCol);
+        this.startingCoordinatesY =  this.convertRowToY(this.characterStartingRow,);
+        // this.startingCoordinates = this.calculateCoordinates(this.characterStartingRow,this.characterStartingCol);
     }
 
-    calculateCoordinates(mapRow, mapCol) {
-        return {
-            x: (mapCol-1)*100.5 +20,
-            y: (mapRow-1)*86 + 24
-        }
+    // calculateCoordinates(mapRow, mapCol) {
+    //     return {
+    //         x: mapCol*100.5 +20,
+    //         y: mapRow*86 + 24
+    //     }
+    // }
+
+    convertRowToY(mapRow) {
+        return mapRow*86 + 24;
+    }
+
+    covertColToX(mapCol) {
+        return mapCol*100.5 +20;
     }
 
     displayScore(){
@@ -187,10 +198,13 @@ class Player {
         }
         this.character = chosenCharacter;
         this.sprite = `images/char-${chosenCharacter}.png`;
-        this.x = gameProperties.startingCoordinates.x; // starting X point for character
-        this.y = gameProperties.startingCoordinates.y; // starting Y point for character
-        this.currentMapX; // maps the x position to the asset map
-        this.currentMapY; // maps the y position to the asset map
+        // this.x = gameProperties.startingCoordinates.x; // starting X point for character
+        // this.y = gameProperties.startingCoordinates.y; // starting Y point for character
+
+        this.currentMapCol = gameProperties.characterStartingCol; // maps the x position to the asset map
+        this.currentMapRow =  gameProperties.characterStartingRow; // maps the y position to the asset map
+        this.x = gameProperties.covertColToX(this.currentMapCol);
+        this.y = gameProperties.convertRowToY(this.currentMapRow);
         this.scored = false;
     }
 
@@ -201,6 +215,7 @@ class Player {
             if (target.x+target.width >= this.x+this.characterDetails[this.character].offsetSides && target.x+target.width <= this.x+this.characterDetails[this.character].width || target.x >= this.x+this.characterDetails[this.character].offsetSides && target.x <= this.x+this.characterDetails[this.character].width) {
                 // do not need full height of target to check for collision
                 if(target.y+(target.height/2) >= this.y+this.characterDetails[this.character].offsetTop && target.y+(target.height/2) <= this.y+this.characterDetails[this.character].height) {
+                    console.log('y hit');
                     hit = true;
                 }
             }
@@ -215,8 +230,10 @@ class Player {
     resetCharacter() {
         // this.x = 220; // starting X point for character
         // this.y = 454; // starting Y point for character
-        this.x = gameProperties.startingCoordinates.x;
-        this.y = gameProperties.startingCoordinates.y;
+        this.x = gameProperties.startingCoordinatesX;
+        this.y = gameProperties.startingCoordinatesY;
+        this.currentMapRow = gameProperties.characterStartingRow;
+        this.currentMapCol = gameProperties.characterStartingCol;
     }
 
     checkSuccess() {
@@ -231,43 +248,106 @@ class Player {
         for (let i = 0; i< allEnemies.length; i++) { 
             if(this.checkCollisionWithPlayer(allEnemies[i])) {
                 this.characterHit(allEnemies[i]);
-                // allEnemies[i].speed = 0; // debug to see collision stop
+                allEnemies[i].speed = 0; // debug to see collision stop
             }
         }
-
-
     }
 
-    render(x = this.x, y = this.y) {
-        this.x = x;
-        this.y = y;
-        ctx.drawImage(Resources.get(this.sprite), this.characterDetails[this.character].imageSubsetX, this.characterDetails[this.character].imageSubsetY, this.characterDetails[this.character].width, this.characterDetails[this.character].height, x, y, this.characterDetails[this.character].width, this.characterDetails[this.character].height);
+    movePlayerThroughMap(direction) {
+        switch(direction) {
+            case 'down': 
+            if(this.currentMapRow < gameProperties.assetMap.length-1) {
+                console.log('sliding down');
+                //assuming 1 is a rock (if more than a rock then put in an array)
+                if(gameProperties.assetMap[this.currentMapRow+1][this.currentMapCol]!=1) {
+                    this.currentMapRow = this.currentMapRow+1;
+                    this.y = gameProperties.convertRowToY(this.currentMapRow);
+                } else {
+                    console.log('youre blocked');
+                }
+            }
+                break;
+            case 'up':
+                if(this.currentMapRow >0) {
+                    console.log('moving on up');
+                    //assuming 1 is a rock (if more than a rock then put in an array)
+                    if(gameProperties.assetMap[this.currentMapRow-1][this.currentMapCol]!=1) {
+                        this.currentMapRow = this.currentMapRow-1;
+                        this.y = gameProperties.convertRowToY(this.currentMapRow);
+                    } else {
+                        console.log('youre blocked');
+                    }
+                }
+                
+                break;
+            case 'right':
+            
+            if(this.currentMapCol < gameProperties.assetMap[0].length-1) {
+                console.log('I am right');
+                //assuming 1 is a rock (if more than a rock then put in an array)
+                if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol+1]!=1) {
+                    this.currentMapCol = this.currentMapCol+1;
+                    this.x = gameProperties.covertColToX(this.currentMapCol);
+                } else {
+                    console.log('youre blocked');
+                }
+            }
+            break;
+            
+                break;
+            case 'left':
+                if(this.currentMapCol >0) {
+                    console.log('moving left');
+                    //assuming 1 is a rock (if more than a rock then put in an array)
+                    if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol-1]!=1) {
+                        this.currentMapCol = this.currentMapCol-1;
+                        this.x = gameProperties.covertColToX(this.currentMapCol);
+                    } else {
+                        console.log('youre blocked');
+                    }
+                }
+                break;
+        }
+    }
+
+    render() {
+        this.x = gameProperties.covertColToX(this.currentMapCol);
+        // this.y = gameProperties.convertRowToY(this.currentMapRow);
+        ctx.drawImage(Resources.get(this.sprite), this.characterDetails[this.character].imageSubsetX, this.characterDetails[this.character].imageSubsetY, this.characterDetails[this.character].width, this.characterDetails[this.character].height, this.x, this.y, this.characterDetails[this.character].width, this.characterDetails[this.character].height);
     }
 
     handleInput(inputCode) {
         switch(inputCode) {
             // debugger;
-            case 'down': 
-                if (this.y <= gameProperties.canvasBoundryBottom) {
-                    this.render(this.x, this.y + this.characterDetails[this.character].height);
-                }
+            case 'down':
+            this.movePlayerThroughMap('down');
+            this.render(); 
+                // if (this.y <= gameProperties.canvasBoundryBottom) {
+                //     this.render(this.x, this.y + this.characterDetails[this.character].height);
+                // }
                 break;
             case 'up':
-                if (this.y >= gameProperties.canvasBoundryTop) {
-                    // you can check using a map (yet to build) whether the item above is a blocked asset (if it is a rock dont move on it)
-                    this.render(this.x, this.y - this.characterDetails[this.character].height);
-                    this.checkSuccess();
-                }
+                this.movePlayerThroughMap('up');
+                this.render();
+                // if (this.y >= gameProperties.canvasBoundryTop) {
+                //     // you can check using a map (yet to build) whether the item above is a blocked asset (if it is a rock dont move on it)
+                //     this.render(this.x, this.y - this.characterDetails[this.character].height);
+                //     this.checkSuccess();
+                // }
                 break;
             case 'right':
-            if (this.x <= gameProperties.canvasBoundryRight) {
-                    this.render(this.x + 101, this.y);
-                }
+                this.movePlayerThroughMap('right');
+                this.render();
+            // if (this.x <= gameProperties.canvasBoundryRight) {
+            //         this.render(this.x + 101, this.y);
+            //     }
                 break;
             case 'left':
-                if (this.x >= gameProperties.canvasBoundryLeft) {
-                    this.render(this.x - 101, this.y);
-                }
+                this.movePlayerThroughMap('left');
+                this.render();
+                // if (this.x >= gameProperties.canvasBoundryLeft) {
+                //     this.render(this.x - 101, this.y);
+                // }
                 break;
             default:
                 console.log('key not recognised');
