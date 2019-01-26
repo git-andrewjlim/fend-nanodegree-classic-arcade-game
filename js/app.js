@@ -112,6 +112,7 @@ class GameProperties {
         }
     }
 
+
     // Show a panel for completion of game
     showGameComplete() {
         const endPanel = document.querySelector('#end-screen');
@@ -119,11 +120,13 @@ class GameProperties {
         document.removeEventListener('keyup', handleKeys);
     }
 
+
     // Convert assetMap row locations to Y coordinates
     // TODO: Update so it is standardised for characters of different heights
     convertRowToY(mapRow) {
         return mapRow*86 + 24;
     }
+
 
     // Convert assetMap column locations to X coordinates
     // TODO: Update so it can read the size of the image tiles within engine.js
@@ -156,6 +159,7 @@ var Enemy = function(speed=1) {
             this.y = 305;
         }
     }
+
 
     // dynamically change the speed of the bug and change the color to reflect the speed
     this.changeSpeed = function(speed = 'normal') {
@@ -274,6 +278,7 @@ class Player {
         this.resetCharacter();
     }
 
+
     // return character to initial position after collision
     resetCharacter() {
         this.x = gameProperties.startingCoordinatesX;
@@ -281,6 +286,7 @@ class Player {
         this.currentMapRow = gameProperties.characterStartingRow;
         this.currentMapCol = gameProperties.characterStartingCol;
     }
+
 
     // continuous updates associated with character (controlled by engine.js)
     update() {
@@ -298,6 +304,7 @@ class Player {
         this.x = gameProperties.covertColToX(this.currentMapCol);
         ctx.drawImage(Resources.get(this.sprite), this.characterDetails[this.character].imageSubsetX, this.characterDetails[this.character].imageSubsetY, this.characterDetails[this.character].width, this.characterDetails[this.character].height, this.x, this.y, this.characterDetails[this.character].width, this.characterDetails[this.character].height);
     }
+
 
     // take user input for direction, check the map for blocker elements or assets if nothing blocking then move in the required direction
     // A 1 represents a blocker asset (e.g. Rock) - TODO: Add assets to page
@@ -367,10 +374,3 @@ objEnemy3.changeSpeed('fast');
 
 // Place all enemy objects in an array called allEnemies
 let allEnemies = [objEnemy1, objEnemy2, objEnemy3];
-
-
-
-
-
-
-
