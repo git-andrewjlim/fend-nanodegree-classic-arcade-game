@@ -8,7 +8,10 @@
 const global = this;
 const arr_characterChoices = document.querySelectorAll('#choose-character img');
 const startBtn = document.querySelector('#start-game');
+const restartBtn = document.querySelector('#restart-game');
 const startPanel = document.querySelector('#choose-character');
+const endPanel = document.querySelector('#end-screen');
+const characterImage = document.querySelector('#character-winner');
 let chosenCharacter = 'boy';
 let player;
 
@@ -26,6 +29,14 @@ startBtn.addEventListener('click', function(){
     player = new Player();
     Engine(global);
     startPanel.style.display = 'none';
+});
+
+
+// Restart the game
+restartBtn.addEventListener('click', function(){
+    endPanel.style.display = 'none';
+    document.addEventListener('keyup', handleKeys);
+    player.resetCharacter();
 });
 
 
@@ -73,6 +84,9 @@ class GameProperties {
         this.characterStartingCol = 2; // Starting y point for character
         this.startingCoordinatesX =  this.covertColToX(this.characterStartingCol);
         this.startingCoordinatesY =  this.convertRowToY(this.characterStartingRow,);
+        this.soundWalk = new Audio('audio/walk.wav');
+        this.soundHit = new Audio('audio/hit.wav');
+        this.soundAchievement = new Audio('audio/achievement.wav');
 
         // Define boundaries of board and also elements of map
         this.assetMap = [
@@ -115,9 +129,11 @@ class GameProperties {
 
     // Show a panel for completion of game
     showGameComplete() {
-        const endPanel = document.querySelector('#end-screen');
+        player.resetCharacter();
+        gameProperties.soundAchievement.play();
         endPanel.style.display = 'block';
         document.removeEventListener('keyup', handleKeys);
+        characterImage.setAttribute('src', `images/char-${chosenCharacter}.png`);
     }
 
 
@@ -275,6 +291,7 @@ class Player {
 
     // actions to take if character is hit by enemy
     characterHit(enemy) {
+        gameProperties.soundHit.play();
         this.resetCharacter();
     }
 
@@ -315,6 +332,7 @@ class Player {
                     if(gameProperties.assetMap[this.currentMapRow+1][this.currentMapCol]!=1) {
                         this.currentMapRow = this.currentMapRow+1;
                         this.y = gameProperties.convertRowToY(this.currentMapRow);
+                        gameProperties.soundWalk.play();
                     }
                 }
             this.render(); 
@@ -329,6 +347,7 @@ class Player {
                         } else {
                             this.currentMapRow = this.currentMapRow-1;
                             this.y = gameProperties.convertRowToY(this.currentMapRow);
+                            gameProperties.soundWalk.play();
                         }
                     }
                 }
@@ -339,6 +358,7 @@ class Player {
                     if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol+1]!=1) {
                         this.currentMapCol = this.currentMapCol+1;
                         this.x = gameProperties.covertColToX(this.currentMapCol);
+                        gameProperties.soundWalk.play();
                     }
                 }
                 this.render();
@@ -348,6 +368,7 @@ class Player {
                     if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol-1]!=1) {
                         this.currentMapCol = this.currentMapCol-1;
                         this.x = gameProperties.covertColToX(this.currentMapCol);
+                        gameProperties.soundWalk.play();
                     }
                 }
                 this.render();

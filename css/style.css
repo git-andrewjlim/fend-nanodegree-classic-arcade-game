@@ -1,23 +1,41 @@
 body {
     text-align: center;
+    font-family: 'Baloo Thambi', cursive;
 }
 
-#choose-character {
+#choose-character, #end-screen {
     width: 600px;
     height: 520px;
     padding: 10px;
-    border: 3px solid cornflowerblue;
+    border: 5px solid #e5c469;
     border-radius: 10px;
-    background-color: lightblue;
+    background-color: #eadd64;
     z-index: 10;
     position: absolute;
-    top: 147px;
     left: 0;
     right: 0;
     margin: auto;
 }
 
-button#start-game {
+#choose-character {
+    top: 147px;
+}
+
+#fireworks {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 20;
+}
+
+#character-winner {
+    position: relative;
+    z-index: 30;
+}
+
+button#start-game,  button#restart-game{
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -31,16 +49,5 @@ button#start-game {
 
 #end-screen {
     display: none;
-    width: 600px;
-    height: 520px;
-    padding: 10px;
-    border: 3px solid cornflowerblue;
-    border-radius: 10px;
-    background-color: lightblue;
-    z-index: 10;
-    position: absolute;
-    top: 128px;
-    left: 0;
-    right: 0;
-    margin: auto;
+    top: 135px;
 }
