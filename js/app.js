@@ -129,6 +129,7 @@ class GameProperties {
         characterImage.setAttribute('src', `images/char-${chosenCharacter}.png`);
     }
 
+
     // compensate for sound overlap when keys/sounds trigger faster than length of sound
     // TODO: Find a better way to allow for overlapping sounds.
     playWalkingSound() {

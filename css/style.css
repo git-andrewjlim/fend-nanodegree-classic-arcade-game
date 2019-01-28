@@ -3,7 +3,13 @@ body {
     font-family: 'Baloo Thambi', cursive;
 }
 
+h1 {
+    color: #5ae86b;
+    text-shadow: 1px 1px 5px #333;
+}
+
 #choose-character, #end-screen {
+    color: #e25cb6;
     width: 600px;
     height: 520px;
     padding: 10px;
