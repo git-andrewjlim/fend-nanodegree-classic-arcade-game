@@ -58,7 +58,9 @@ function handleKeys(e) {
         39: 'right',
         40: 'down'
     };
-    player.handleInput(allowedKeys[e.keyCode]);
+    if(player) {
+        player.handleInput(allowedKeys[e.keyCode]);
+    }
 }
 
 
@@ -84,10 +86,10 @@ class GameProperties {
         this.characterStartingCol = 2; // Starting y point for character
         this.startingCoordinatesX =  this.covertColToX(this.characterStartingCol);
         this.startingCoordinatesY =  this.convertRowToY(this.characterStartingRow,);
-        this.soundWalk1 = new Audio('audio/walk.wav');
-        this.soundWalk2 = new Audio('audio/walk.wav');
-        this.soundWalk3 = new Audio('audio/walk.wav');
-        this.soundWalk4 = new Audio('audio/walk.wav');
+        this.soundWalk1 = new Audio('audio/walk.wav'); // used for triggering of the sound too quickly
+        this.soundWalk2 = new Audio('audio/walk.wav'); // used for triggering of the sound too quickly
+        this.soundWalk3 = new Audio('audio/walk.wav'); // used for triggering of the sound too quickly
+        this.soundWalk4 = new Audio('audio/walk.wav'); // used for triggering of the sound too quickly
         this.soundHit = new Audio('audio/hit.wav');
         this.soundAchievement = new Audio('audio/achievement.wav');
         this.soundToggle = 1;
@@ -105,30 +107,31 @@ class GameProperties {
         // asset Items include a name, the image reference and whether they block the character
         // TODO: add height, width and subdivision of images so that it can easily be placed on the board
         this.assetItems = {
-            0: ['clear', '' ,false],
-            1: ['rock', 'images/Rock.png', true],
-            2: ['goal', 'images/Selector.png', false],
-            3: ['green gem','images/Gem Green.png', false],
-            4: ['blue gem','images/Gem Blue.png', false],
-            5: ['orange gem','images/Gem Orange.png', false],
-            6: ['star','images/Star.png', false],
-            7: ['key','images/Key.png', false],
-            8: ['heart','images/Heart.png', false]
+            0: {name: 'clear', image: '', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
+            1: {name: 'rock', image: 'images/Rock.png', width: 85, height: 87, imageSubsetX: 8, imageSubsetY: 67, subblocker: true},
+            2: {name: 'goal', image: 'images/Selector.png', width: 101, height: 171, imageSubsetX: 1, imageSubsetY: 1, subblocker: false},
+            3: {name: 'green gem', image: 'images/Gem Green.png', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
+            4: {name: 'blue gem', image: 'images/Gem Blue.png', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
+            5: {name: 'orange gem', image: 'images/Gem Orange.png', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
+            6: {name: 'star', image: 'images/Star.png', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
+            7: {name: 'key', image: 'images/Key.png', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
+            8: {name: 'heart', image: 'images/Heart.png', width: 0, height: 0, imageSubsetX: 0, imageSubsetY: 0, subblocker: false},
         }
     }
 
 
     // Add assets to board depending upon assetMap array and assetItems object
     // TODO: Update so assets are added to board automatically, will need to add height, width and offsets for this to work correctly
-    loadAssetsToBoard() {
-        for(let i = 0; i<this.assetMap.length; i++){
-            for(let j = 0; j<this.assetMap[i].length; j++){
-                if(this.assetItems[this.assetMap[i][j]][1]) {
-                    // console.log(this.assetItems[this.assetMap[i][j]][1]);
-                }
-            }
-        }
-    }
+    // loadAssetsToBoard() {
+    //     for(let i = 0; i<this.assetMap.length; i++){
+    //         for(let j = 0; j<this.assetMap[i].length; j++){
+    //             if(this.assetItems[this.assetMap[i][j]]['image']) {
+    //                 console.log(this.assetItems[this.assetMap[i][j]]['image']);
+    //                 ctx.drawImage(Resources.get(this.assetItems[this.assetMap[i][j]]['image']), this.assetItems[this.assetMap[i][j]]['imageSubsetX'], this.assetItems[this.assetMap[i][j]]['imageSubsetY'], this.assetItems[this.assetMap[i][j]]['width'], this.assetItems[this.assetMap[i][j]]['height'], this.covertColToX(j), this.convertRowToY(i), this.assetItems[this.assetMap[i][j]]['width'], this.assetItems[this.assetMap[i][j]]['height']);
+    //             }
+    //         }
+    //     }
+    // }
 
 
     // Show a panel for completion of game
@@ -141,7 +144,8 @@ class GameProperties {
     }
 
     // compensate for sound overlap when keys/sounds trigger faster than length of sound
-    soundOverlap() {
+    // TODO: Find a better way to allow for overlapping sounds.
+    playWalkingSound() {
         if(this.soundToggle == 1) {
             this.soundWalk1.play();
             this.soundToggle++;
@@ -170,6 +174,7 @@ class GameProperties {
     covertColToX(mapCol) {
         return mapCol*100.5 +20;
     }
+
 }
 
 
@@ -353,7 +358,7 @@ class Player {
                     if(gameProperties.assetMap[this.currentMapRow+1][this.currentMapCol]!=1) {
                         this.currentMapRow = this.currentMapRow+1;
                         this.y = gameProperties.convertRowToY(this.currentMapRow);
-                        gameProperties.soundOverlap();
+                        gameProperties.playWalkingSound();
                     }
                 }
             this.render(); 
@@ -368,7 +373,7 @@ class Player {
                         } else {
                             this.currentMapRow = this.currentMapRow-1;
                             this.y = gameProperties.convertRowToY(this.currentMapRow);
-                            gameProperties.soundOverlap();
+                            gameProperties.playWalkingSound();
                         }
                     }
                 }
@@ -379,7 +384,7 @@ class Player {
                     if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol+1]!=1) {
                         this.currentMapCol = this.currentMapCol+1;
                         this.x = gameProperties.covertColToX(this.currentMapCol);
-                        gameProperties.soundOverlap();
+                        gameProperties.playWalkingSound();
                     }
                 }
                 this.render();
@@ -389,7 +394,7 @@ class Player {
                     if(gameProperties.assetMap[this.currentMapRow][this.currentMapCol-1]!=1) {
                         this.currentMapCol = this.currentMapCol-1;
                         this.x = gameProperties.covertColToX(this.currentMapCol);
-                        gameProperties.soundOverlap();
+                        gameProperties.playWalkingSound();
                     }
                 }
                 this.render();
