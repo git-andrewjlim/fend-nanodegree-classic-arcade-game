@@ -120,20 +120,6 @@ class GameProperties {
     }
 
 
-    // Add assets to board depending upon assetMap array and assetItems object
-    // TODO: Update so assets are added to board automatically, will need to add height, width and offsets for this to work correctly
-    // loadAssetsToBoard() {
-    //     for(let i = 0; i<this.assetMap.length; i++){
-    //         for(let j = 0; j<this.assetMap[i].length; j++){
-    //             if(this.assetItems[this.assetMap[i][j]]['image']) {
-    //                 console.log(this.assetItems[this.assetMap[i][j]]['image']);
-    //                 ctx.drawImage(Resources.get(this.assetItems[this.assetMap[i][j]]['image']), this.assetItems[this.assetMap[i][j]]['imageSubsetX'], this.assetItems[this.assetMap[i][j]]['imageSubsetY'], this.assetItems[this.assetMap[i][j]]['width'], this.assetItems[this.assetMap[i][j]]['height'], this.covertColToX(j), this.convertRowToY(i), this.assetItems[this.assetMap[i][j]]['width'], this.assetItems[this.assetMap[i][j]]['height']);
-    //             }
-    //         }
-    //     }
-    // }
-
-
     // Show a panel for completion of game
     showGameComplete() {
         player.resetCharacter();
