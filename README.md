@@ -5,7 +5,9 @@
 This Classic Arcade Game Clone Project is the third project for the <a target="_blank" href="https://www.udacity.com/course/front-end-web-developer-nanodegree--nd001">Udacity Front-End Web Developer Nanodegree</a>.
 
 ## About the Game
-The classic arcade game requires the player to try to get to the water while avoiding the speeding bugs. If the player is hit by a bug they will reappear at the beginning of the game.
+The classic arcade game requires the player to try to get to the water while avoiding the speeding bugs. If the player is hit by a bug they will reappear at the beginning of the game. 
+
+Use the UP, DOWN, LEFT and RIGHT arrow keys to move the character around the screen.
 
 ## Project Files
 This game requires the following (all included within the repository):
